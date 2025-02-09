@@ -1,9 +1,23 @@
 import dataclasses
 import datetime
+import httpx
 
-from typing import TYPE_CHECKING
+from langchain_core.prompts import ChatPromptTemplate
+
+from typing import TYPE_CHECKING, Annotated, TypedDict
 
 from .models import Items
+
+from apps.item_categories import services as model_categorires
+
+import os
+from dotenv import load_dotenv
+# Carica le variabili dal file .env
+load_dotenv()
+
+
+
+from apps.llm.models import llm
 
 
 if TYPE_CHECKING:
@@ -35,12 +49,41 @@ class ItemDataClass:
     )    
     
 def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
+  proposed_category = autoSetCategory(name=item_dc.name, user=user)
+  print(proposed_category)
   items_create = Items.objects.create(
     name=item_dc.name,
     consumation_average_days=item_dc.consumation_average_days,
-    department=item_dc.department,
+    department=proposed_category,
     is_edible=item_dc.is_edible,
     category=item_dc.category,
     user=user
   )
   return ItemDataClass.from_instance(items_create)
+
+class predictedCategory(TypedDict):
+    category: Annotated[str, ..., "La categorie del prodotto"]
+
+
+def autoSetCategory(name: str, user) -> str:
+  categories = model_categorires.get_item_categories(user)
+  category_names = [category.name for category in categories]
+  separetor = ', '
+  categories_string = separetor.join(map(str, category_names))
+  prompt = ChatPromptTemplate.from_messages([
+      ("system", "Devi catalogare prodotti che puoi trovare in un supermercato"),
+      ("user", f"Tra le categorie: {categories_string}. A quale appartiene {name}?"),
+  ])
+  # prompt = ChatPromptTemplate.from_messages([
+  #   ("system", "You are a world class technical documentation writer."),
+  #   ("user", "{input}")
+  # ])
+  structured_llm = llm.with_structured_output(predictedCategory)
+  chain = prompt | structured_llm 
+  print("---------------")
+  # print(chain.invoke({"input": "how can langsmith help with testing?"}))
+  print(chain.invoke({"input": 'prompt'}))
+  print (prompt)
+  proposed_category = chain.invoke({"input": 'prompt'})['category']
+  return proposed_category
+  
