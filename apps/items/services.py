@@ -45,7 +45,7 @@ class ItemDataClass:
     )    
     
 def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
-  proposed_category = autoSetCategory(name=item_dc.name, user=user)
+  proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   items_create = Items.objects.create(
     name=item_dc.name,
@@ -61,7 +61,7 @@ def get_items(user: "UserModel") -> list["ItemDataClass"]:
   items = Items.objects.filter(user=user)
   return [ItemDataClass.from_instance(single_item) for single_item in items]
 
-def autoSetCategory(name: str, user) -> 'ItemCategories':
+def auto_set_category(name: str, user) -> 'ItemCategories':
   categories = model_categorires.get_item_categories(user)
   mapped_category = [{'name': category.name, 'id': category.id} for category in categories]
   categories_string = ', '.join(category['name'] for category in mapped_category)
