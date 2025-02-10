@@ -10,7 +10,7 @@ class ItemSerializer(serializers.Serializer):
   category = ItemCategorySerializer(read_only=True, required=False)
   name = serializers.CharField()
   consumation_average_days = serializers.FloatField(required=False) # from LLM
-  department = serializers.BooleanField(required=False) # from LLM
+  department = serializers.CharField(required=False) # from LLM
   is_edible = serializers.BooleanField(required=False) # from LLM
   created_at = serializers.DateTimeField(read_only=True)
   updated_at = serializers.DateTimeField(read_only=True)
