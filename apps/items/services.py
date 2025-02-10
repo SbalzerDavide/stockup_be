@@ -1,28 +1,22 @@
 import dataclasses
 import datetime
-import httpx
+import json
+from django.shortcuts import get_object_or_404
 
-from langchain_core.prompts import ChatPromptTemplate
+from langchain.output_parsers import ResponseSchema, StructuredOutputParser
+from langchain_core.prompts import PromptTemplate
 
-from typing import TYPE_CHECKING, Annotated, TypedDict
+from typing import TYPE_CHECKING
 
 from .models import Items
 
 from apps.item_categories import services as model_categorires
-
-import os
-from dotenv import load_dotenv
-# Carica le variabili dal file .env
-load_dotenv()
-
-
+from apps.item_categories.models import ItemCategories
 
 from apps.llm.models import llm
 
-
 if TYPE_CHECKING:
-  from .models import Items
-    
+  from .models import Items 
 
 @dataclasses.dataclass
 class ItemDataClass:
@@ -50,40 +44,56 @@ class ItemDataClass:
     
 def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = autoSetCategory(name=item_dc.name, user=user)
-  print(proposed_category)
   items_create = Items.objects.create(
     name=item_dc.name,
+    category= proposed_category,
     consumation_average_days=item_dc.consumation_average_days,
-    department=proposed_category,
+    department=item_dc.department,
     is_edible=item_dc.is_edible,
-    category=item_dc.category,
     user=user
   )
   return ItemDataClass.from_instance(items_create)
 
-class predictedCategory(TypedDict):
-    category: Annotated[str, ..., "La categorie del prodotto"]
-
-
-def autoSetCategory(name: str, user) -> str:
+def autoSetCategory(name: str, user) -> 'ItemCategories':
   categories = model_categorires.get_item_categories(user)
-  category_names = [category.name for category in categories]
-  separetor = ', '
-  categories_string = separetor.join(map(str, category_names))
-  prompt = ChatPromptTemplate.from_messages([
-      ("system", "Devi catalogare prodotti che puoi trovare in un supermercato"),
-      ("user", f"Tra le categorie: {categories_string}. A quale appartiene {name}?"),
-  ])
-  # prompt = ChatPromptTemplate.from_messages([
-  #   ("system", "You are a world class technical documentation writer."),
-  #   ("user", "{input}")
-  # ])
-  structured_llm = llm.with_structured_output(predictedCategory)
-  chain = prompt | structured_llm 
-  print("---------------")
-  # print(chain.invoke({"input": "how can langsmith help with testing?"}))
-  print(chain.invoke({"input": 'prompt'}))
-  print (prompt)
-  proposed_category = chain.invoke({"input": 'prompt'})['category']
-  return proposed_category
-  
+  mapped_category = [{'name': category.name, 'id': category.id} for category in categories]
+  categories_string = ', '.join(category['name'] for category in mapped_category)
+
+  response_schemas = [
+    ResponseSchema(name="category", description="Categoria del prodotto, selezionata dall'elenco fornito")
+  ]
+  output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+  prompt_template = PromptTemplate(
+    template=(
+        "Ti fornirò il nome di un prodotto acquistabile al supermercato e una lista di categorie. "
+        "Il tuo compito è assegnare il prodotto alla categoria più appropriata dalla lista.\n\n"
+        "Prodotto: {product}\n"
+        "Categorie disponibili: {categories}\n\n"
+        "{format_instructions}"
+    ),
+    input_variables=["product", "categories"],
+    partial_variables={"format_instructions": output_parser.get_format_instructions()},
+  )
+  formatted_prompt = prompt_template.format(
+    product=name,
+    categories=categories_string,
+  )
+  response = llm.invoke(formatted_prompt)
+  try:
+    structured_output = response.json()
+  except json.JSONDecodeError:
+    print("Errore: Risposta non è un JSON valido")
+    return None
+  structured_output = output_parser.parse(response.content)
+  if(not structured_output.get('category')):
+    return None
+  for item in mapped_category:
+    if item['name'].lower() == structured_output['category'].lower():
+        proposed_category_id = item['id']
+        break 
+    else:
+      proposed_category_id = None
+  proposed_category_id = next((item['id'] for item in mapped_category if item['name'].lower() == structured_output['category'].lower()), None)
+  if not proposed_category_id:
+    return None
+  return get_object_or_404(ItemCategories, pk=proposed_category_id)
