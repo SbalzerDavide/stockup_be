@@ -19,8 +19,8 @@ class ItemListApi(views.APIView):
 
         return response.Response(data=serializer.data)
 
-    # def get(self, request):
-    #     items = services.get_items(user=request.user)
-    #     serializer = serializers.ItemSerializer(items, many=True)
+    def get(self, request):
+        items = services.get_items(user=request.user)
+        serializer = serializers.ItemSerializer(items, many=True)
 
-    #     return response.Response(data=serializer.data)
+        return response.Response(data=serializer.data)
