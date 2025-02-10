@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 
 from .models import Items
 
+from user.models import User as UserModel
+
 from apps.item_categories import services as model_categorires
 from apps.item_categories.models import ItemCategories
 
@@ -44,15 +46,20 @@ class ItemDataClass:
     
 def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = autoSetCategory(name=item_dc.name, user=user)
+  proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   items_create = Items.objects.create(
     name=item_dc.name,
     category= proposed_category,
     consumation_average_days=item_dc.consumation_average_days,
     department=item_dc.department,
-    is_edible=item_dc.is_edible,
+    is_edible=proposed_is_edible,
     user=user
   )
   return ItemDataClass.from_instance(items_create)
+
+def get_items(user: "UserModel") -> list["ItemDataClass"]:
+  items = Items.objects.filter(user=user)
+  return [ItemDataClass.from_instance(single_item) for single_item in items]
 
 def autoSetCategory(name: str, user) -> 'ItemCategories':
   categories = model_categorires.get_item_categories(user)
@@ -97,3 +104,33 @@ def autoSetCategory(name: str, user) -> 'ItemCategories':
   if not proposed_category_id:
     return None
   return get_object_or_404(ItemCategories, pk=proposed_category_id)
+
+def auto_set_is_edible(name: str) -> bool:
+  response_schemas = [
+    ResponseSchema(name="is_edible", description="Definisce se un proddoto è commestibile o meno")
+  ]
+  output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+  prompt_template = PromptTemplate(
+    template=(
+        "Ti fornirò il nome di un prodotto acquistabile al supermercato."
+        "Il tuo compito è assegnare assegnare il valore true se il prodotto è edibile e false se non lo è.\n\n"
+        "Prodotto: {product}\n"
+        "{format_instructions}"
+    ),
+    input_variables=["product", "categories"],
+    partial_variables={"format_instructions": output_parser.get_format_instructions()},
+  )
+  formatted_prompt = prompt_template.format(
+    product=name,
+  )
+  response = llm.invoke(formatted_prompt)
+  try:
+    structured_output = response.json()
+  except json.JSONDecodeError:
+    print("Errore: Risposta non è un JSON valido")
+    return None
+  structured_output = output_parser.parse(response.content)
+  if 'is_edible' not in structured_output:
+    return None
+  return structured_output['is_edible']
+
