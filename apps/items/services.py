@@ -47,11 +47,12 @@ class ItemDataClass:
 def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
+  proposed_department = auto_set_department(name=item_dc.name)
   items_create = Items.objects.create(
     name=item_dc.name,
     category= proposed_category,
     consumation_average_days=item_dc.consumation_average_days,
-    department=item_dc.department,
+    department=proposed_department,
     is_edible=proposed_is_edible,
     user=user
   )
@@ -107,7 +108,7 @@ def auto_set_category(name: str, user) -> 'ItemCategories':
 
 def auto_set_is_edible(name: str) -> bool:
   response_schemas = [
-    ResponseSchema(name="is_edible", description="Definisce se un proddoto è commestibile o meno")
+    ResponseSchema(name="is_edible", description="Definisce se un prodotto è commestibile o meno")
   ]
   output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
   prompt_template = PromptTemplate(
@@ -133,4 +134,39 @@ def auto_set_is_edible(name: str) -> bool:
   if 'is_edible' not in structured_output:
     return None
   return structured_output['is_edible']
+
+def auto_set_department(name: str) -> str:
+  response_schemas = [
+    ResponseSchema(name="department", description="Definisce il reparto del supermercato in cui trovare un prodotto")
+  ]
+  departments = ['Frutta e verdura', 'Macelleria', 'Pescheria', 'Salumeria', 'Panetteria', 'Pasticceria', 'Latticini', 'Surgelati', 'Pasta e riso', 'Conserve', 'Bevande', 'Igiene', 'Pulizia', 'Alcolici', 'Caffè e tè', 'Dolci', 'Snack', 'Cereali', 'Piatti pronti', 'Cibo per animali', 'Altro']
+  departments_string = ', '.join(department for department in departments)
+
+  output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+  prompt_template = PromptTemplate(
+    template=(
+        "Ti fornirò il nome di un prodotto acquistabile al supermercato e una lista reparti del supermercato. "
+        "Il tuo compito è assegnare il prodotto al reparto in cu isi può trovare più appropriata dalla lista.\n\n"
+        "Prodotto: {product}\n"
+        "reparti: {departments_string}\n\n"
+        "{format_instructions}"
+    ),
+    input_variables=["product", "categories"],
+    partial_variables={"format_instructions": output_parser.get_format_instructions()},
+  )
+  formatted_prompt = prompt_template.format(
+    product=name,
+    departments_string=departments_string
+  )
+  response = llm.invoke(formatted_prompt)
+  try:
+    structured_output = response.json()
+  except json.JSONDecodeError:
+    print("Errore: Risposta non è un JSON valido")
+    return None
+  structured_output = output_parser.parse(response.content)
+  if 'department' not in structured_output:
+    return None
+  return structured_output['department']
+
 
