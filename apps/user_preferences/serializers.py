@@ -5,7 +5,6 @@ from . import services
 
 class UserPreferencesSerializer(serializers.Serializer):
   id = serializers.IntegerField(read_only=True)
-  # user_id = serializers.IntegerField()
   preference_type = serializers.CharField()
   value = serializers.CharField()
   user = user_serializers.UserSerializer(read_only=True)
