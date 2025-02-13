@@ -12,8 +12,11 @@ from .models import Items
 
 from user.models import User as UserModel
 
-from apps.item_categories import services as model_categorires
+from apps.item_categories import services as service_categorires
 from apps.item_categories.models import ItemCategories
+
+from apps.item_macronutriments import services as service_macronutriments
+from apps.item_macronutriments.models import ItemMacronutriments
 
 from apps.llm.models import llm
 
@@ -24,6 +27,7 @@ if TYPE_CHECKING:
 class ItemDataClass:
   name: str
   category: str = None
+  macronutriments: str = None
   consumation_average_days: float = None
   department: str = None
   is_edible: bool = None
@@ -37,6 +41,7 @@ class ItemDataClass:
       id=items_model.id,
       name=items_model.name,
       category=items_model.category,
+      macronutriments=items_model.macronutriments,
       consumation_average_days=items_model.consumation_average_days,
       department=items_model.department,
       is_edible=items_model.is_edible,
@@ -48,9 +53,12 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   proposed_department = auto_set_department(name=item_dc.name)
+  proposed_macronutriments = auto_set_macronutriments(name=item_dc.name)
+  print(proposed_macronutriments)
   items_create = Items.objects.create(
     name=item_dc.name,
     category= proposed_category,
+    macronutriments=proposed_macronutriments,
     consumation_average_days=item_dc.consumation_average_days,
     department=proposed_department,
     is_edible=proposed_is_edible,
@@ -63,7 +71,7 @@ def get_items(user: "UserModel") -> list["ItemDataClass"]:
   return [ItemDataClass.from_instance(single_item) for single_item in items]
 
 def auto_set_category(name: str, user) -> 'ItemCategories':
-  categories = model_categorires.get_item_categories(user)
+  categories = service_categorires.get_item_categories(user)
   mapped_category = [{'name': category.name, 'id': category.id} for category in categories]
   categories_string = ', '.join(category['name'] for category in mapped_category)
 
@@ -87,11 +95,7 @@ def auto_set_category(name: str, user) -> 'ItemCategories':
     categories=categories_string,
   )
   response = llm.invoke(formatted_prompt)
-  try:
-    structured_output = response.json()
-  except json.JSONDecodeError:
-    print("Errore: Risposta non è un JSON valido")
-    return None
+  parse_json(response.content)
   structured_output = output_parser.parse(response.content)
   if(not structured_output.get('category')):
     return None
@@ -116,7 +120,9 @@ def auto_set_is_edible(name: str) -> bool:
         "Ti fornirò il nome di un prodotto acquistabile al supermercato."
         "Il tuo compito è assegnare assegnare il valore true se il prodotto è edibile e false se non lo è.\n\n"
         "Prodotto: {product}\n"
-        "{format_instructions}"
+        "{format_instructions}\n"
+        "Devi sempre restituire un JSON valido racchiuso da un blocco di codice markdown. Non restituire alcun testo aggiuntivo."
+
     ),
     input_variables=["product", "categories"],
     partial_variables={"format_instructions": output_parser.get_format_instructions()},
@@ -125,11 +131,8 @@ def auto_set_is_edible(name: str) -> bool:
     product=name,
   )
   response = llm.invoke(formatted_prompt)
-  try:
-    structured_output = response.json()
-  except json.JSONDecodeError:
-    print("Errore: Risposta non è un JSON valido")
-    return None
+  parse_json(response.content)
+
   structured_output = output_parser.parse(response.content)
   if 'is_edible' not in structured_output:
     return None
@@ -149,7 +152,9 @@ def auto_set_department(name: str) -> str:
         "Il tuo compito è assegnare il prodotto al reparto in cu isi può trovare più appropriata dalla lista.\n\n"
         "Prodotto: {product}\n"
         "reparti: {departments_string}\n\n"
-        "{format_instructions}"
+        "Devi sempre restituire un JSON valido racchiuso da un blocco di codice markdown. Non restituire alcun testo aggiuntivo."
+        "{format_instructions}\n"
+        "Devi sempre restituire un JSON valido racchiuso da un blocco di codice markdown. Non restituire alcun testo aggiuntivo."
     ),
     input_variables=["product", "categories"],
     partial_variables={"format_instructions": output_parser.get_format_instructions()},
@@ -159,14 +164,55 @@ def auto_set_department(name: str) -> str:
     departments_string=departments_string
   )
   response = llm.invoke(formatted_prompt)
-  try:
-    structured_output = response.json()
-  except json.JSONDecodeError:
-    print("Errore: Risposta non è un JSON valido")
-    return None
+  parse_json(response.content)
+
   structured_output = output_parser.parse(response.content)
   if 'department' not in structured_output:
     return None
   return structured_output['department']
 
+def auto_set_macronutriments(name: str) -> 'ItemMacronutriments':
+  macronutriments = service_macronutriments.get_item_macronutriments()
+  mapped_macronutriments = [{'summary': f"{macronutriment.name} {macronutriment.description}" , 'id': macronutriment.id} for macronutriment in macronutriments]
 
+  response_schemas = [
+    ResponseSchema(name="macronutriment", description="Definisce il macronutrimente più apprpriato per il prodotto rispetto alla lista fornita")
+  ]
+  output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
+  prompt_template = PromptTemplate(
+    template=(
+        "Ti fornirò il nome di un prodotto acquistabile al supermercato e un array di macronutrimenti.\n\n"
+        "Al prodotto deve essere abbinato una tipologia di macronutrimenti rispetto alle sue proprotà nutrizionali.\n\n"
+        "Il tuo compito è assegnare il prodotto alla tipologia di macronutirimenti più appropriata dalla lista.\n\n"
+        "Prodotto: {product}\n"
+        "Tipologie di macronutrimenti disponibili: {macronutriments}\n\n"
+        "{format_instructions}\n"
+        "Devi sempre restituire un JSON valido racchiuso da un blocco di codice markdown. Non restituire alcun testo aggiuntivo."
+    ),
+    input_variables=["product", "macronutriments"],
+    partial_variables={"format_instructions": output_parser.get_format_instructions()},
+  )
+  formatted_prompt = prompt_template.format(
+    product=name,
+    macronutriments=json.dumps(mapped_macronutriments),
+  )
+  response = llm.invoke(formatted_prompt)
+  parse_json(response.content)
+  structured_output = output_parser.parse(response.content)
+  if(not structured_output.get('macronutriment')):
+    return None
+  for item in mapped_macronutriments:
+    if item['id'] == structured_output['macronutriment']:
+        proposed_macronutriment_id = item['id']
+        break 
+    else:
+      proposed_macronutriment_id = None
+  if not proposed_macronutriment_id:
+    return None
+  return get_object_or_404(ItemMacronutriments, pk=proposed_macronutriment_id)
+
+def parse_json(string):
+  try:
+    return json.loads(string)
+  except:
+    return string

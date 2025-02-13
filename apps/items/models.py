@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 
 from apps.item_categories.models import ItemCategories
+from apps.item_macronutriments.models import ItemMacronutriments
 
 class Items(models.Model):
   user = models.ForeignKey(
@@ -16,6 +17,14 @@ class Items(models.Model):
     null=True,
     blank=True,
     verbose_name='category'
+  )
+  
+  macronutriments = models.ForeignKey(
+    ItemMacronutriments,
+    on_delete= models.SET_NULL,
+    null=True,
+    blank=True,
+    verbose_name='macronutriments'
   )
 
   name = models.CharField(max_length=255)

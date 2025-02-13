@@ -3,11 +3,13 @@ from rest_framework import serializers
 from . import services
 from user.serializers import UserSerializer
 from apps.item_categories.serializers import ItemCategorySerializer
+from apps.item_macronutriments.serializers import ItemMacronutrimentsSerializer
 
 class ItemSerializer(serializers.Serializer):
   id = serializers.IntegerField(read_only=True)
   user = UserSerializer(read_only=True)
   category = ItemCategorySerializer(read_only=True, required=False)
+  macronutriments = ItemMacronutrimentsSerializer(required=False)
   name = serializers.CharField()
   consumation_average_days = serializers.FloatField(required=False) # from LLM
   department = serializers.CharField(required=False) # from LLM
