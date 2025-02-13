@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "user",
     "apps.user_preferences",
     "apps.item_categories",
+    "apps.item_macronutriments",
     "apps.item"
 ]
 
