@@ -3,7 +3,7 @@ from django.conf import settings
 
 class ItemCategories(models.Model):
   user = models.ForeignKey(
-  settings.AUTH_USER_MODEL, 
+    settings.AUTH_USER_MODEL, 
     on_delete=models.CASCADE, # If the user is deleted, delete the preferences
     verbose_name='user'
   )
