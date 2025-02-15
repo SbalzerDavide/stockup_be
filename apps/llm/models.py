@@ -9,8 +9,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ollama_host = os.getenv("OLLAMA_HOST")
-print(f"Ollama host: {ollama_host}")
 model = OllamaLLM(model="llama3.2", base_url=ollama_host)
-llm = ChatOpenAI(model="llama3.2", api_key="ollama", base_url=f"{ollama_host}/v1")
+llm = ChatOpenAI(model="llama3.2", api_key="ollama", base_url=f"{ollama_host}/v1", temperature=0)
+structuredModel = ChatOpenAI(
+  model="llama3.2",  
+  api_key="ollama", 
+  base_url=f"{ollama_host}/v1", 
+  model_kwargs={ "response_format": { "type": "json_object" } }
+)
 
 
