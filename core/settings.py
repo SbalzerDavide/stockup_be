@@ -42,8 +42,8 @@ INSTALLED_APPS = [
     "apps.user_preferences",
     "apps.item_categories",
     "apps.item_macronutriments",
-    "apps.item"
-]
+    "apps.items",
+    "apps.shopping_list_items",]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
