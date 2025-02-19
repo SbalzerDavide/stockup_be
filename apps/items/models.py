@@ -7,7 +7,7 @@ from apps.item_macronutriments.models import ItemMacronutriments
 class Items(models.Model):
   user = models.ForeignKey(
     settings.AUTH_USER_MODEL, 
-    on_delete=models.CASCADE, # If the user is deleted, delete the preferences
+    on_delete=models.CASCADE, # If the user is deleted, delete item
     verbose_name='user'
   )
   
