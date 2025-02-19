@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 @dataclasses.dataclass
 class ItemDataClass:
   name: str
-  category: str = None
-  macronutriments: str = None
+  category: service_categorires.ItemCategoriesDataClass = None
+  macronutriments: service_macronutriments.ItemMacronutrimentsDataClass = None
   consumation_average_days: float = None
   department: str = None
   is_edible: bool = None
