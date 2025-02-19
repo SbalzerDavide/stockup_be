@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 class ShoppingListItemDataClass:
   is_checked: bool
   is_proposed: bool
-  item: item_services.ItemDataClass
-  item_id: str
   quantity: int
+  item: item_services.ItemDataClass = None
+  item_id: str = None
   weight: float = None
   unit_weight: str = None
   volume: float = None
@@ -51,8 +51,6 @@ class ShoppingListItemDataClass:
     
 def create_shopping_list_item(user: "UserModel", shopping_list_item_dc: "ShoppingListItemDataClass") -> "ShoppingListItemDataClass":
   item = get_object_or_404(ItemModel, pk=shopping_list_item_dc.item_id)
-  # item = item_services.get_item_by_id(shopping_list_item_dc.item_id)
-  print(item)
   shopping_list_item_create = ShoppingListItems.objects.create(
     item=item,
     is_checked=shopping_list_item_dc.is_checked,
