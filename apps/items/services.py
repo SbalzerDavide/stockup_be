@@ -51,6 +51,7 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   proposed_department = auto_set_department(name=item_dc.name)
+  # TODO: not calc macronutriments is is not edible
   proposed_macronutriments = auto_set_macronutriments(name=item_dc.name)
   items_create = Items.objects.create(
     name=item_dc.name,
@@ -66,6 +67,10 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
 def get_items(user: "UserModel") -> list["ItemDataClass"]:
   items = Items.objects.filter(user=user)
   return [ItemDataClass.from_instance(single_item) for single_item in items]
+
+def get_item_by_id(item_id: int) -> "ItemDataClass":
+  items = get_object_or_404(Items, pk=item_id)
+  return ItemDataClass.from_instance(items)
 
 def auto_set_category(name: str, user) -> 'ItemCategories':
   categories = service_categorires.get_item_categories(user)
