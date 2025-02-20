@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from . import services
+from . import models
 
 from apps.items.serializers import ItemSerializer
 from user.serializers import UserSerializer
@@ -12,7 +13,7 @@ class ShoppingListItemSerializer(serializers.Serializer):
   user = UserSerializer(read_only=True)
   item = ItemSerializer(read_only=True, required=False)
   
-  item_id = serializers.IntegerField()
+  item_id = serializers.IntegerField(required=False)
   
   is_checked = serializers.BooleanField(default=False)  
   is_proposed = serializers.BooleanField(default=False) 
@@ -31,3 +32,32 @@ class ShoppingListItemSerializer(serializers.Serializer):
     data = super().to_internal_value(data)
     
     return services.ShoppingListItemDataClass(**data)
+  
+  # example of how to override the to_representation method 
+  # for field to show in the sesponse
+  # def to_representation(self, instance):
+  #   rapresentation =  super().to_representation(instance)
+  #   item = rapresentation.get('item')
+  #   cleaned_item = {
+  #     "id": item.get('id'),
+  #     "name": item.get('name'),
+  #     "department": item.get('department'),
+  #   }
+  #   return {
+  #     'id': rapresentation.get('id'),
+  #     'user': rapresentation.get('user'),
+  #     # 'item': rapresentation.get('item'),
+  #     'item': cleaned_item,
+  #     'item_id': rapresentation.get('item_id'),
+  #     'is_checked': rapresentation.get('is_checked'),
+  #     'is_proposed': rapresentation.get('is_proposed'),
+  #     'quantity': rapresentation.get('quantity'),
+  #     'volume': rapresentation.get('volume'),
+  #     'weight': rapresentation.get('weight'),
+  #     # 'unit_volume': rapresentation.get('unit_volume'),
+  #     # 'unit_weight': rapresentation.get('unit_weight'),
+  #     # 'created_at': rapresentation.get('created_at'),
+  #     # 'updated_at': rapresentation.get('updated_at')
+  #   }
+  
+ 
