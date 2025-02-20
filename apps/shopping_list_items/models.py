@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 
 from apps.items.models import Items
+from apps.shopping_list.models import ShoppingList
 
 class ShoppingListItems(models.Model):
   user = models.ForeignKey(
@@ -14,6 +15,12 @@ class ShoppingListItems(models.Model):
     Items,
     on_delete=models.CASCADE, # If the item is deleted, delete shopping list item
     verbose_name='user'
+  )
+  
+  shopping_list = models.ForeignKey(
+    ShoppingList,
+    on_delete=models.CASCADE, # If the shopping list is deleted, delete shopping list item
+    verbose_name='shopping list',
   )
   
   is_checked = models.BooleanField()

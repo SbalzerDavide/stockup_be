@@ -11,6 +11,8 @@ from user.models import User as UserModel
 from apps.items import services as item_services
 from apps.items.models import Items as ItemModel 
 
+from apps.shopping_list import services as shopping_list_services
+
 from .models import ShoppingListItems
 
 if TYPE_CHECKING:
@@ -24,6 +26,8 @@ class ShoppingListItemDataClass:
   quantity: int
   item: item_services.ItemDataClass = None
   item_id: str = None
+  shopping_list_id: str = None
+  shopping_list: shopping_list_services.ShoppingListDataClass = None
   weight: float = None
   unit_weight: str = None
   volume: float = None
@@ -40,6 +44,8 @@ class ShoppingListItemDataClass:
       is_proposed=shopping_list_items_model.is_proposed,
       item=shopping_list_items_model.item,
       item_id=shopping_list_items_model.item_id,
+      shopping_list_id=shopping_list_items_model.shopping_list_id,
+      shopping_list=shopping_list_items_model.shopping_list,
       quantity=shopping_list_items_model.quantity,
       weight=shopping_list_items_model.weight,
       unit_weight=shopping_list_items_model.unit_weight,
@@ -53,6 +59,7 @@ def create_shopping_list_item(user: "UserModel", shopping_list_item_dc: "Shoppin
   item = get_object_or_404(ItemModel, pk=shopping_list_item_dc.item_id)
   shopping_list_item_create = ShoppingListItems.objects.create(
     item=item,
+    shopping_list_id=shopping_list_item_dc.shopping_list_id,
     is_checked=shopping_list_item_dc.is_checked,
     is_proposed=shopping_list_item_dc.is_proposed,
     quantity=shopping_list_item_dc.quantity,

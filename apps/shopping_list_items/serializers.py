@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from apps.shopping_list.serializers import ShoppingListSerializer
+
 from . import services
 from . import models
 
@@ -11,9 +13,12 @@ from user.serializers import UserSerializer
 class ShoppingListItemSerializer(serializers.Serializer):
   id = serializers.IntegerField(read_only=True)
   user = UserSerializer(read_only=True)
-  item = ItemSerializer(read_only=True, required=False)
   
+  item = ItemSerializer(read_only=True, required=False)
   item_id = serializers.IntegerField(required=False)
+  
+  shopping_list_id = serializers.IntegerField(required=False)
+  shopping_list = ShoppingListSerializer(read_only=True, required=False)
   
   is_checked = serializers.BooleanField(default=False)  
   is_proposed = serializers.BooleanField(default=False) 
