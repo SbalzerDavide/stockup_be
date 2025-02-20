@@ -15,7 +15,7 @@ class ShoppingListItems(models.Model):
     on_delete=models.CASCADE, # If the item is deleted, delete shopping list item
     verbose_name='user'
   )
-
+  
   is_checked = models.BooleanField()
   is_proposed = models.BooleanField()
   
