@@ -11,14 +11,11 @@ class ShoppingList(models.Model):
   name = models.CharField(max_length=255)
   description = models.TextField(blank=True, null=True)
   
-  is_active = models.BooleanField()
-  is_purchased = models.BooleanField()
-  
+  is_active = models.BooleanField(default=True)
+  is_purchased = models.BooleanField(default=False)
+    
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
 
   class Meta:
     db_table = "shopping_lists"
-
-  def __str__(self):
-    return self.name

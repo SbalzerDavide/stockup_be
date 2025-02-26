@@ -4,13 +4,13 @@ from user import authentication
 
 from . import serializers
 from . import services
-
 class ShoppingListsListApi(views.APIView):
   authentication_classes = (authentication.UserAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
 
   def post(self, request):
     serializer = serializers.ShoppingListSerializer(data=request.data)
+    
     serializer.is_valid(raise_exception=True)
 
     data = serializer.validated_data

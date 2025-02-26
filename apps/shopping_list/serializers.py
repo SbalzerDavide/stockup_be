@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
 
-from user import serializers as user_serializers
+from user.serializers import UserSerializer
 
 from . import services
 
 
 class ShoppingListSerializer(serializers.Serializer):
   id = serializers.IntegerField(read_only=True)
-  user = user_serializers.UserSerializer(read_only=True)
+  user = UserSerializer(read_only=True)
   
-  name = serializers.CharField(max_length=255)
+  name = serializers.CharField()
   description = serializers.CharField(max_length=255, required=False)
   
   is_active = serializers.BooleanField(default=True)
