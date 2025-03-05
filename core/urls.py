@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/', include('apps.items.urls')),
     path('api/', include('apps.item_macronutriments.urls')),
     path('api/', include('apps.shopping_list_items.urls')),
+    path('api/', include('apps.purchases.urls')),
 ]
