@@ -30,10 +30,13 @@ class loginApi(views.APIView):
     
     token = services.create_token(user_id=user.id)
     
-    resp = response.Response()
+    serializer = user_serializers.UserSerializer(user)
+    response_data = serializer.data
+    response_data['token'] = token
+    resp = response.Response(data=response_data)
     
     resp.set_cookie(key='jwt', value=token, httponly=True)
-    
+
     return resp
     
 class userApi(views.APIView):
