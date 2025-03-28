@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 @dataclasses.dataclass
 class ItemMacronutrimentsDataClass:
   name: str
-  description: str
+  description: str = None
   created_at: datetime.datetime = None
   updated_at: datetime.datetime = None
   id: int = None
