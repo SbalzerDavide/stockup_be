@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-edr+6!b!sbunmem$1+hmb3lgpc#jl3&&694s8bk=yqb485-pwp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "corsheaders",
     "user",
     "apps.user_preferences",
     "apps.item_categories",
@@ -46,10 +47,11 @@ INSTALLED_APPS = [
     "apps.shopping_list_items",
     "apps.shopping_list",
     "apps.purchases",
-    ]
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,7 +83,6 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -139,5 +140,13 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = 'user.User'
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDEENTIALS = True
+
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True  # Sostituisci CORS_ORIGIN_ALLOW_ALL
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+    "http://127.0.0.1:8081",
+]
+
