@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("items", "0003_items_macronutriments"),
+        ("items", "0002_alter_items_consumation_average_days_and_more"),
         ("shopping_list", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
