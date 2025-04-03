@@ -64,13 +64,12 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   )
   return ItemDataClass.from_instance(items_create)
 
-def get_items(user: "UserModel") -> list["ItemDataClass"]:
-  items = Items.objects.filter(user=user)
-  return [ItemDataClass.from_instance(single_item) for single_item in items]
+def get_items(user: "UserModel") -> "Items":
+    return Items.objects.filter(user=user)
 
 def get_item_by_id(item_id: int) -> "ItemDataClass":
-  items = get_object_or_404(Items, pk=item_id)
-  return ItemDataClass.from_instance(items)
+    items = get_object_or_404(Items, pk=item_id)
+    return ItemDataClass.from_instance(items)
 
 def auto_set_category(name: str, user) -> 'ItemCategories':
   categories = service_categorires.get_item_categories(user)
