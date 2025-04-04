@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 
 from . import models
+from .models import User
 
 load_dotenv()
 
