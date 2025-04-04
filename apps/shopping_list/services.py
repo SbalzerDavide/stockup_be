@@ -40,6 +40,9 @@ def create_shopping_list(user, shopping_list_dc: "ShoppingListDataClass") -> "Sh
   )
   return ShoppingListDataClass.from_instance(shopping_list)    
     
-def get_shopping_lists(user) -> "ShoppingListDataClass":
-  shoppingLists = ShoppingListModel.objects.filter(user=user)
-  return [ShoppingListDataClass.from_instance(shopping_list) for shopping_list in shoppingLists]
+def get_shopping_lists(user):
+  return ShoppingListModel.objects.filter(user=user)
+
+def get_shopping_lists_as_dataclasses(user):
+  shopping_lists = get_shopping_lists(user)
+  return [ShoppingListDataClass.from_instance(shopping_list) for shopping_list in shopping_lists]

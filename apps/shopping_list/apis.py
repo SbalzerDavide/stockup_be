@@ -1,26 +1,32 @@
-from rest_framework import views, response, permissions
+from rest_framework import views, response, permissions, filters, generics
+from rest_framework.pagination import PageNumberPagination
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
 
 from user import authentication
 
 from . import serializers
 from . import services
-class ShoppingListsListApi(views.APIView):
+from .models import ShoppingList
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class ShoppingListsListApi(generics.ListCreateAPIView):
   authentication_classes = (authentication.UserAuthentication,)
   permission_classes = (permissions.IsAuthenticated,)
+  pagination_class = StandardResultsSetPagination
+  filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+  filterset_fields = ['created_at', 'updated_at']
+  search_fields = ['name']
+  ordering_fields = ['name', 'created_at', 'updated_at']
+  ordering = ['-created_at']  # default ordering
+  serializer_class = serializers.ShoppingListSerializer
 
-  def post(self, request):
-    serializer = serializers.ShoppingListSerializer(data=request.data)
-    
-    serializer.is_valid(raise_exception=True)
+  def get_queryset(self):
+    return ShoppingList.objects.filter(user=self.request.user)
 
-    data = serializer.validated_data
-
-    # create shoping list
-    serializer.instance = services.create_shopping_list(user=request.user, shopping_list_dc=data)
-    return response.Response(data=serializer.data)
-
-  def get(self, request):
-    items = services.get_shopping_lists(user=request.user)
-    serializer = serializers.ShoppingListSerializer(items, many=True)
-
-    return response.Response(data=serializer.data)
+  def perform_create(self, serializer):
+    serializer.save(user=self.request.user)
