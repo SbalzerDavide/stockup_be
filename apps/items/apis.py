@@ -17,7 +17,7 @@ class ItemListApi(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['category', 'is_edible', 'department', 'created_at', 'updated_at']
+    filterset_fields = ['category', 'macronutriments', 'is_edible', 'department', 'created_at', 'updated_at']
     search_fields = ['name']
     ordering_fields = ['name', 'created_at', 'updated_at', 'consumation_average_days']
     ordering = ['-created_at']  # ordinamento predefinito
