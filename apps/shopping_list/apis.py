@@ -19,8 +19,8 @@ class ShoppingListsListApi(generics.ListCreateAPIView):
   permission_classes = (permissions.IsAuthenticated,)
   pagination_class = StandardResultsSetPagination
   filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-  filterset_fields = ['created_at', 'updated_at']
-  search_fields = ['name']
+  filterset_fields = ['created_at', 'updated_at', 'is_purchased', 'is_active']
+  search_fields = ['name', 'description']
   ordering_fields = ['name', 'created_at', 'updated_at']
   ordering = ['-created_at']  # default ordering
   serializer_class = serializers.ShoppingListSerializer
