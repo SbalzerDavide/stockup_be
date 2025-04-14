@@ -51,8 +51,10 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   proposed_department = auto_set_department(name=item_dc.name)
-  # TODO: not calc macronutriments is is not edible
-  proposed_macronutriments = auto_set_macronutriments(name=item_dc.name)
+  if proposed_is_edible:
+    proposed_macronutriments = auto_set_macronutriments(name=item_dc.name)
+  else:
+    proposed_macronutriments = None
   items_create = Items.objects.create(
     name=item_dc.name,
     category= proposed_category,
