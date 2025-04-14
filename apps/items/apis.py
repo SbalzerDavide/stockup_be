@@ -20,7 +20,7 @@ class ItemListApi(generics.ListCreateAPIView):
     filterset_fields = ['category', 'macronutriments', 'is_edible', 'department', 'created_at', 'updated_at']
     search_fields = ['name']
     ordering_fields = ['name', 'created_at', 'updated_at', 'consumation_average_days']
-    ordering = ['-created_at']  # ordinamento predefinito
+    ordering = ['name']  # ordinamento predefinito
     serializer_class = serializers.ItemSerializer
 
     def get_queryset(self):
