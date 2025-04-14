@@ -24,3 +24,12 @@ class ShoppingListItemListApi(views.APIView):
     serializer = serializers.ShoppingListItemSerializer(items, many=True)
 
     return response.Response(data=serializer.data)
+  
+class ShoppingListItemDetailApi(views.APIView):
+  authentication_classes = (authentication.UserAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
+
+  def get(self, request, shopping_list_item_id):
+    shopping_list_item = services.get_shopping_list_item(shopping_list_item_id=shopping_list_item_id)
+    serializer = serializers.ShoppingListItemSerializer(shopping_list_item)
+    return response.Response(data=serializer.data)

@@ -72,3 +72,7 @@ def create_shopping_list_item(user: "UserModel", shopping_list_item_dc: "Shoppin
 def get_shopping_list_items(user: "UserModel") -> list["ShoppingListItemDataClass"]:
   shoppingListItems = ShoppingListItems.objects.filter(user=user)
   return [ShoppingListItemDataClass.from_instance(shopping_list_item) for shopping_list_item in shoppingListItems]
+
+def get_shopping_list_item(shopping_list_item_id: int) -> "ShoppingListItemDataClass":
+  shopping_list_item = get_object_or_404(ShoppingListItems, pk=shopping_list_item_id)
+  return ShoppingListItemDataClass.from_instance(shopping_list_item)
