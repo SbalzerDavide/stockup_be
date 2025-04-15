@@ -19,4 +19,34 @@ class ShoppingListSerializer(serializers.ModelSerializer):
     
     items = ShoppingListItems.objects.filter(shopping_list=obj)
     serializer = ShoppingListItemSerializer(items, many=True)
-    return serializer.data
+    items_data = serializer.data
+    
+    # customization of the representation
+    custom_items = []
+    for item in items_data:
+      # Seleziona solo i campi che vuoi includere
+      custom_item = {
+        'id': item.get('id'),
+        'item_name': item.get('item', {}).get('name') if item.get('item') else None,
+        'item_id': item.get('item_id'),
+        'is_checked': item.get('is_checked'),
+        'is_proposed': item.get('is_proposed'),
+        'quantity': item.get('quantity'),
+        'weight': item.get('weight'),
+        'unit_weight': item.get('unit_weight'),
+        'volume': item.get('volume'),
+        'unit_volume': item.get('unit_volume'),
+      }
+      
+      # add optional fields only if they exist
+      if item.get('weight'):
+        custom_item['weight'] = item.get('weight')
+        custom_item['unit_weight'] = item.get('unit_weight')
+        
+      if item.get('volume'):
+        custom_item['volume'] = item.get('volume')
+        custom_item['unit_volume'] = item.get('unit_volume')
+        
+      custom_items.append(custom_item)
+    
+    return custom_items

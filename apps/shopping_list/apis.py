@@ -30,3 +30,15 @@ class ShoppingListsListApi(generics.ListCreateAPIView):
 
   def perform_create(self, serializer):
     serializer.save(user=self.request.user)
+
+class ShoppingListDetailApi(views.APIView):
+  authentication_classes = (authentication.UserAuthentication,)
+  permission_classes = (permissions.IsAuthenticated,)
+
+  def get(self, request, shopping_list_id):
+    try:
+      shopping_list = ShoppingList.objects.get(id=shopping_list_id)
+      serializer = serializers.ShoppingListSerializer(shopping_list)
+      return response.Response(data=serializer.data)
+    except ShoppingList.DoesNotExist:
+      return response.Response(status=404, data={"detail": "Shopping list not found"})
