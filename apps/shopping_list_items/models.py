@@ -41,4 +41,4 @@ class ShoppingListItems(models.Model):
     db_table = "shopping_list_items"
 
   def __str__(self):
-    return self.name
+    return self.item.name
