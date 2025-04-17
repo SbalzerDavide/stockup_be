@@ -28,6 +28,9 @@ class ShoppingListSerializer(serializers.ModelSerializer):
       custom_item = {
         'id': item.get('id'),
         'item_name': item.get('item', {}).get('name') if item.get('item') else None,
+        'macronutriments': item.get('item', {}).get('macronutrients') if item.get('item') else None,
+        'category': item.get('item', {}).get('category') if item.get('item') else None,
+        'department': item.get('item', {}).get('department') if item.get('item') else None,
         'item_id': item.get('item_id'),
         'is_checked': item.get('is_checked'),
         'is_proposed': item.get('is_proposed'),
