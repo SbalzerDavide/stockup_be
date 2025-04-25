@@ -4,5 +4,5 @@ from . import apis
 
 urlpatterns = [
   path('items/', apis.ItemListApi.as_view(), name='items'),
-  # path('items/<int:items_id>/', apis.ItemsDetailApi.as_view(), name='items_detail')
+  path('items/<int:item_id>/', apis.ItemDetailApi.as_view(), name='items_detail')
 ]
