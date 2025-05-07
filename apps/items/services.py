@@ -3,6 +3,10 @@ import datetime
 import json
 from django.shortcuts import get_object_or_404
 from pydantic import BaseModel
+# import emoji
+
+import re
+
 
 from typing import TYPE_CHECKING
 
@@ -24,6 +28,7 @@ if TYPE_CHECKING:
 @dataclasses.dataclass
 class ItemDataClass:
   name: str
+  emoji: str = None
   category: service_categorires.ItemCategoriesDataClass = None
   macronutriments: service_macronutriments.ItemMacronutrimentsDataClass = None
   consumation_average_days: float = None
@@ -38,6 +43,7 @@ class ItemDataClass:
     return cls(
       id=items_model.id,
       name=items_model.name,
+      emoji=items_model.emoji,
       category=items_model.category,
       macronutriments=items_model.macronutriments,
       consumation_average_days=items_model.consumation_average_days,
@@ -51,12 +57,15 @@ def create_item(user, item_dc: "ItemDataClass") -> "ItemDataClass":
   proposed_category = auto_set_category(name=item_dc.name, user=user)
   proposed_is_edible = auto_set_is_edible(name=item_dc.name)
   proposed_department = auto_set_department(name=item_dc.name)
+  proposed_emoji = auto_set_emoji(name=item_dc.name)
+  # proposed_emoji = 'pippo'
   if proposed_is_edible:
     proposed_macronutriments = auto_set_macronutriments(name=item_dc.name)
   else:
     proposed_macronutriments = None
   items_create = Items.objects.create(
     name=item_dc.name,
+    emoji=proposed_emoji,
     category= proposed_category,
     macronutriments=proposed_macronutriments,
     consumation_average_days=item_dc.consumation_average_days,
@@ -145,3 +154,22 @@ def auto_set_macronutriments(name: str) -> 'ItemMacronutriments':
   if not proposed_macronutriment_id:
     return None
   return get_object_or_404(ItemMacronutriments, pk=proposed_macronutriment_id)
+
+def auto_set_emoji(name: str) -> str:
+  class StructuredOutput(BaseModel) : 
+    emoji: str
+    
+  prompt = f"Data una parola, restituisci l’emoji visibile più simile o rappresentativa possibile di {name}. Se non esiste una corrispondenza perfetta, scegli l’emoji che meglio comunica il concetto principale della parola. Data una parola, restituisci l’emoji, più simile o rappresentativa possibile di {name}. Se non esiste una corrispondenza perfetta, scegli l’emoji che meglio comunica il concetto principale della parola. Restituisci solo l’emoji, senza spiegazioni o testo aggiuntivo."
+  structuredLlm = llm.with_structured_output(StructuredOutput);
+
+  response = structuredLlm.invoke(prompt)
+  emoji_raw = response.emoji
+
+    
+  if not emoji_raw:
+    return None
+
+  return emoji_raw
+
+
+

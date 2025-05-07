@@ -11,6 +11,7 @@ class ItemSerializer(serializers.Serializer):
   category = ItemCategorySerializer(read_only=True, required=False)
   macronutriments = ItemMacronutrimentsSerializer(required=False)
   name = serializers.CharField()
+  emoji = serializers.CharField(required=False) # from LLM
   consumation_average_days = serializers.FloatField(required=False) # from LLM
   department = serializers.CharField(required=False) # from LLM
   is_edible = serializers.BooleanField(required=False) # from LLM
@@ -19,5 +20,5 @@ class ItemSerializer(serializers.Serializer):
   
   def to_internal_value(self, data):
     data = super().to_internal_value(data)
-    
+    print("----------data----------", data)
     return services.ItemDataClass(**data)

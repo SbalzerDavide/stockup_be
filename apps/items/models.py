@@ -28,6 +28,7 @@ class Items(models.Model):
   )
 
   name = models.CharField(max_length=255)
+  emoji = models.CharField(max_length=255, null=True, blank=True)
   consumation_average_days = models.FloatField(null=True, blank=True)
   department = models.TextField(max_length=255, null=True, blank=True)
   is_edible = models.BooleanField(null=True, blank=True)
