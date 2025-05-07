@@ -88,7 +88,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'OPTIONS': {
-            'init_command': 'SET default_storage_engine=INNODB',
+            'charset': 'utf8mb4',
+            'init_command': "SET default_storage_engine=INNODB; SET NAMES 'utf8mb4';",
         },
         'NAME': 'mydb',
         'USER': 'myuser',
