@@ -76,3 +76,25 @@ def get_shopping_list_items(user: "UserModel") -> list["ShoppingListItemDataClas
 def get_shopping_list_item(shopping_list_item_id: int) -> "ShoppingListItemDataClass":
   shopping_list_item = get_object_or_404(ShoppingListItems, pk=shopping_list_item_id)
   return ShoppingListItemDataClass.from_instance(shopping_list_item)
+
+def update_shopping_list_item(
+  id: int, 
+  shopping_list_item_dc: "ShoppingListItemDataClass"
+  ) -> "ShoppingListItemDataClass":
+  print("update shopping list item", id)
+  item = get_object_or_404(ShoppingListItems, pk=id)
+  item.is_checked = shopping_list_item_dc.is_checked
+  item.is_proposed = shopping_list_item_dc.is_proposed
+  item.quantity = shopping_list_item_dc.quantity
+  item.weight = shopping_list_item_dc.weight
+  item.unit_weight = shopping_list_item_dc.unit_weight
+  item.volume = shopping_list_item_dc.volume
+  item.unit_volume = shopping_list_item_dc.unit_volume
+  item.save()
+  
+  return ShoppingListItemDataClass.from_instance(item)
+
+def delete_shopping_list_item(shopping_list_item_id: int):
+  shopping_list_item = get_object_or_404(ShoppingListItems, pk=shopping_list_item_id)
+  shopping_list_item.delete()
+  return shopping_list_item

@@ -33,3 +33,18 @@ class ShoppingListItemDetailApi(views.APIView):
     shopping_list_item = services.get_shopping_list_item(shopping_list_item_id=shopping_list_item_id)
     serializer = serializers.ShoppingListItemSerializer(shopping_list_item)
     return response.Response(data=serializer.data)
+  
+  def put(self, request, shopping_list_item_id):
+    serializer = serializers.ShoppingListItemSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    
+    data = serializer.validated_data
+    
+    serializer.instance = services.update_shopping_list_item(id=shopping_list_item_id, shopping_list_item_dc=data)
+    
+    return response.Response(data=serializer.data)
+  
+  def delete(self, request, shopping_list_item_id):
+    services.delete_shopping_list_item(shopping_list_item_id=shopping_list_item_id)
+    
+    return response.Response(status=204)
