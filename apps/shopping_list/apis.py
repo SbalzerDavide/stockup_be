@@ -42,3 +42,23 @@ class ShoppingListDetailApi(views.APIView):
       return response.Response(data=serializer.data)
     except ShoppingList.DoesNotExist:
       return response.Response(status=404, data={"detail": "Shopping list not found"})
+  
+  def put(self, request, shopping_list_id):
+    instance = ShoppingList.objects.get(id=shopping_list_id)
+    
+    # Usa il serializer per validare i dati ma con l'istanza esistente
+    serializer = serializers.ShoppingListSerializer(instance, data=request.data, partial=True)
+    serializer.is_valid(raise_exception=True)
+    
+    # Usa i dati validati
+    validated_data = serializer.validated_data
+    
+    # Aggiorna l'istanza
+    updated_instance = services.update_shopping_list(
+        id=shopping_list_id, 
+        shopping_list_item_dc=validated_data
+    )
+    
+    # Serializza per la risposta
+    response_serializer = serializers.ShoppingListSerializer(updated_instance)
+    return response.Response(data=response_serializer.data)
