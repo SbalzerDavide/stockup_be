@@ -19,7 +19,7 @@ class Purchase(models.Model):
   )
   
   total_cost = models.FloatField()
-  total_items = models.IntegerField()
+  total_items = models.IntegerField(null=True, blank=True)
   
   store = models.TextField(max_length=255, null=True, blank=True)
   
