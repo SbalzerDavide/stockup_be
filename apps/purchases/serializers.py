@@ -12,10 +12,10 @@ class PurchaseSerializer(serializers.Serializer):
   shopping_list_id = serializers.IntegerField()
   
   total_cost = serializers.FloatField()
-  total_items = serializers.IntegerField()
+  total_items = serializers.IntegerField(required=False)
   
   store = serializers.CharField(max_length=255)
-  purchase_date = serializers.DateTimeField()
+  purchase_date = serializers.DateTimeField(required=False)
   
   created_at = serializers.DateTimeField(read_only=True)
   updated_at = serializers.DateTimeField(read_only=True)

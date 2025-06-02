@@ -20,9 +20,9 @@ class PurchaseDataClass:
   shopping_list_id: int
   shopping_list = shopping_list_services.ShoppingListDataClass = None
   total_cost: float
-  total_items: int
-  store: str
-  purchase_date: datetime.datetime
+  total_items: int = None
+  store: str = None
+  purchase_date: datetime.datetime = None
   created_at: datetime.datetime = None
   updated_at: datetime.datetime = None
   id: int = None
