@@ -29,7 +29,6 @@ class PurchaseDataClass:
   
   @classmethod
   def from_instance(cls, purchase_model: "PurchaseModel") -> "PurchaseDataClass":
-    print(purchase_model.shopping_list)
     return cls(
       id=purchase_model.id,
       shopping_list_id=purchase_model.shopping_list_id,
